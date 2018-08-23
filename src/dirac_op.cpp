@@ -119,23 +119,31 @@ void dirac_op::random_U(field<gauge>& U, double eps) {
 }
 
 // explicitly construct dirac op as dense (3xVOL)x(3xVOL) matrix
+// using normalisation D = 2m + U..
 Eigen::MatrixXcd dirac_op::D_dense_matrix(field<gauge>& U) {
-  Eigen::MatrixXcd D_matrix = Eigen::MatrixXcd::Zero(3 * U.V, 3 * U.V);
+  Eigen::MatrixXcd D_matrix =
+      Eigen::MatrixXcd::Zero(N_gauge * U.V, N_gauge * U.V);
   apply_eta_bcs_to_U(U);
-  double mu_I_plus_factor = exp(0.5 * mu_I);
-  double mu_I_minus_factor = exp(-0.5 * mu_I);
+  std::complex<double> mu_I_plus_factor = std::polar(1.0, mu_I);
+  std::complex<double> mu_I_minus_factor = std::polar(1.0, -mu_I);
   for (int ix = 0; ix < U.V; ++ix) {
-    D_matrix.block<3, 3>(3 * ix, 3 * ix) = mass * SU3mat::Identity();
+    int m_ix = N_gauge * ix;
+    D_matrix.block<N_gauge, N_gauge>(m_ix, m_ix) =
+        2.0 * mass * SU3mat::Identity();
     // mu=0 terms have extra chemical potential isospin factors
-    // exp(+-\mu_I/2): NB eta[ix][0] is just 1 so dropped from this expression
-    D_matrix.block<3, 3>(3 * ix, 3 * U.iup(ix, 0)) =
-        0.5 * mu_I_plus_factor * U[ix][0];
-    D_matrix.block<3, 3>(3 * ix, 3 * U.idn(ix, 0)) =
-        -0.5 * mu_I_minus_factor * U.dn(ix, 0)[0].adjoint();
+    // exp(+- i \mu_I): NB eta[ix][0] is just 1 so dropped from this expression
+    int m_ix_up = N_gauge * U.iup(ix, 0);
+    int m_ix_dn = N_gauge * U.idn(ix, 0);
+    D_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_up) =
+        mu_I_plus_factor * U[ix][0];
+    D_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_dn) =
+        -mu_I_minus_factor * U.dn(ix, 0)[0].adjoint().eval();
     for (int mu = 1; mu < 4; ++mu) {
-      D_matrix.block<3, 3>(3 * ix, 3 * U.iup(ix, mu)) = 0.5 * U[ix][mu];
-      D_matrix.block<3, 3>(3 * ix, 3 * U.idn(ix, mu)) =
-          -0.5 * U.dn(ix, mu)[mu].adjoint();
+      int m_ix_up = N_gauge * U.iup(ix, mu);
+      int m_ix_dn = N_gauge * U.idn(ix, mu);
+      D_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_up) = U[ix][mu];
+      D_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_dn) =
+          -U.dn(ix, mu)[mu].adjoint().eval();
     }
   }
   remove_eta_bcs_from_U(U);
@@ -147,7 +155,7 @@ Eigen::MatrixXcd dirac_op::D_eigenvalues(field<gauge>& U) {
   Eigen::MatrixXcd D_matrix = D_dense_matrix(U);
   // find all eigenvalues of non-hermitian dirac operator matrix D
   Eigen::ComplexEigenSolver<Eigen::MatrixXcd> ces;
-  ces.compute(D_matrix);
+  ces.compute(D_matrix, false);
   return ces.eigenvalues();
 }
 
@@ -159,4 +167,55 @@ Eigen::MatrixXcd dirac_op::DDdagger_eigenvalues(field<gauge>& U) {
   Eigen::SelfAdjointEigenSolver<Eigen::MatrixXcd> saes;
   saes.compute(D_matrix);
   return saes.eigenvalues();
+}
+
+Eigen::MatrixXcd dirac_op::B_dense_matrix(field<gauge>& U, int it) {
+  Eigen::MatrixXcd B_matrix =
+      Eigen::MatrixXcd::Zero(2 * N_gauge * U.VOL3, 2 * N_gauge * U.VOL3);
+  apply_eta_bcs_to_U(U);
+  // top-left corner matrix B(it)
+  for (int ix3 = 0; ix3 < U.VOL3; ++ix3) {
+    int m_ix = N_gauge * ix3;
+    B_matrix.block<N_gauge, N_gauge>(m_ix, m_ix) =
+        2.0 * mass * SU3mat::Identity();
+    int ix4 = U.it_ix(it, ix3);
+    for (int mu = 1; mu < 4; ++mu) {
+      int m_ix_up = N_gauge * (U.iup(ix4, mu) - it) / U.L0;
+      int m_ix_dn = N_gauge * (U.idn(ix4, mu) - it) / U.L0;
+      B_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_up) = U[ix4][mu];
+      B_matrix.block<N_gauge, N_gauge>(m_ix, m_ix_dn) =
+          -U.dn(ix4, mu)[mu].adjoint().eval();
+    }
+  }
+  remove_eta_bcs_from_U(U);
+  // top-right and bottom-left identity matrices
+  for (int m_ix = 0; m_ix < N_gauge * U.VOL3; ++m_ix) {
+    B_matrix(m_ix, m_ix + N_gauge * U.VOL3) = 1.0;
+    B_matrix(m_ix + N_gauge * U.VOL3, m_ix) = 1.0;
+  }
+  return B_matrix;
+}
+
+Eigen::MatrixXcd dirac_op::P_eigenvalues(field<gauge>& U) {
+  Eigen::MatrixXcd P_matrix =
+      Eigen::MatrixXcd::Zero(2 * N_gauge * U.VOL3, 2 * N_gauge * U.VOL3);
+  // gauge fix U to axial gauge
+  gauge_fix_axial(U);
+  // construct
+  // ((U, 0), (0, U))
+  // where U is the set of L^3 timelike links on timeslice T-1
+  for (int ix3 = 0; ix3 < U.VOL3; ++ix3) {
+    int m_ix = N_gauge * ix3;
+    int ix4 = U.it_ix(U.L0 - 1, ix3);
+    P_matrix.block<N_gauge, N_gauge>(m_ix, m_ix) = U[ix4][0];
+    P_matrix.block<N_gauge, N_gauge>(m_ix + N_gauge * U.VOL3,
+                                     m_ix + N_gauge * U.VOL3) = U[ix4][0];
+  }
+  for (int it = U.L0 - 1; it >= 0; --it) {
+    P_matrix = B_dense_matrix(U, it) * P_matrix;
+  }
+  // find all eigenvalues of non-hermitian matrix P
+  Eigen::ComplexEigenSolver<Eigen::MatrixXcd> ces;
+  ces.compute(P_matrix, false);
+  return ces.eigenvalues();
 }

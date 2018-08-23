@@ -17,24 +17,48 @@ void logger(const std::string& message, const std::string& value) {
 
 void logger(const std::string& message, double value) {
   std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
-            << std::left << std::setw(STRING_WIDTH) << value << std::endl;
+            << std::left << std::scientific << std::setw(STRING_WIDTH) << value
+            << std::endl;
 }
 
-void logger(const std::string& message, std::complex<double> value) {
+void logger(const std::string& message, std::complex<double>& value) {
   std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
-            << std::left << std::setw(STRING_WIDTH) << value << std::endl;
+            << std::left << std::scientific << std::setw(STRING_WIDTH) << value
+            << std::endl;
 }
 
 void logger(const std::string& message, double value1, double value2) {
   std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
-            << std::left << std::setw(STRING_WIDTH) << value1 << std::left
-            << std::setw(STRING_WIDTH) << value2 << std::endl;
+            << std::left << std::scientific << std::setw(STRING_WIDTH) << value1
+            << std::left << std::setw(STRING_WIDTH) << value2 << std::endl;
 }
 
 void logger(const std::string& message, const std::vector<double>& value) {
-  std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message;
+  std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
+            << std::scientific;
   for (int i = 0; i < static_cast<int>(value.size()); ++i) {
     std::cout << " " << value[i];
+  }
+  std::cout << std::endl;
+}
+
+void logger(const std::string& message,
+            const std::vector<std::complex<double>>& value) {
+  std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
+            << std::scientific;
+  for (int i = 0; i < static_cast<int>(value.size()); ++i) {
+    std::cout << " " << value[i];
+  }
+  std::cout << std::endl;
+}
+
+void logger(const std::string& message,
+            std::vector<std::complex<mpfr::mpreal>>& re,
+            std::vector<std::complex<mpfr::mpreal>>& im) {
+  std::cout << "# " << std::left << std::setw(STRING_WIDTH) << message
+            << std::scientific;
+  for (int i = 0; i < static_cast<int>(re.size()); ++i) {
+    std::cout << " (" << re[i] << "," << im[i] << ")";
   }
   std::cout << std::endl;
 }

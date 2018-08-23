@@ -60,6 +60,16 @@ class dirac_op {
 
   // explicitly construct dirac op as dense (3*VOL)x(3*VOL) matrix
   Eigen::MatrixXcd D_dense_matrix(field<gauge>& U);
+
+  // explicitly construct dense (2x3xVOL3)x(2x3xVOL3) matrix P
+  // diagonalise and return all eigenvalues
+  // NOTE: also gauge fixes U to axial gauge
+  Eigen::MatrixXcd P_eigenvalues(field<gauge>& U);
+
+  // explicitly construct dense (2x3xVOL3)x(2x3xVOL3) matrix
+  // B at timeslice it, using normalisation D = 2m + U..
+  // MUST be lexi grid layout for U!
+  Eigen::MatrixXcd B_dense_matrix(field<gauge>& U, int it);
 };
 
 #endif  // LKEEGAN_MURHMC_DIRAC_OP_H
