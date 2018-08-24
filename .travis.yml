@@ -11,6 +11,9 @@ addons:
   apt:
     packages:
       - lcov
+      - libgmp-dev
+      - libmpfr-dev
+      - libmpfrc++-dev
 
 script:
   - export OMP_NUM_THREADS=1
