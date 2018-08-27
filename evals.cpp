@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
   // Use mpfr++ multiple precision reals
   // Set bits of precision for type mpfr::mpreal
-  constexpr int BITS_OF_PRECISION = 1024;
+  constexpr int BITS_OF_PRECISION = 4096;
   mpfr::mpreal::set_default_prec(BITS_OF_PRECISION);
 
   double mass = 0.05;
@@ -77,15 +77,12 @@ int main(int argc, char* argv[]) {
 
     // Output ZC(Q) = c_Q/det(M) for each Q
     // Q = k - k_max/2
-    std::cout << "# Coeffs (Q, ZC_re, ZC_im): " << std::endl;
+    std::cout << "# Coeffs (Q, ZC_re, ZC_im, phase): " << std::endl;
     for (int k = 0; k <= k_max; ++k) {
       int Q = k - k_max / 2;
-      mpfr::mpreal magnitude =
-          sqrt(c_new_re[k] * c_new_re[k] + c_new_im[k] * c_new_im[k]);
       mpfr::mpreal phase = atan2(c_new_im[k], c_new_re[k]);
       std::cout << i_config << "\t" << Q << "\t" << c_new_re[k] / det << "\t"
-                << c_new_im[k] / det << "\t" << P_evals(k).real() << "\t"
-                << phase << std::endl;
+                << c_new_im[k] / det << "\t" << phase << std::endl;
     }
   }
   return 0;
