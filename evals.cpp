@@ -36,6 +36,13 @@ int main(int argc, char* argv[]) {
     // Get eigenvalues of reduced matrix P (expensive part)
     Eigen::MatrixXcd P_evals = D.P_eigenvalues(U);
 
+    // Output eigenvalues
+    std::cout << "# Eigenvalues (lambda_re, lambda_im): " << std::endl;
+    for (int k = 0; k < P_evals.rows(); ++k) {
+      std::cout << "#EV " << P_evals(k).real() << "\t" << P_evals(k).imag()
+                << std::endl;
+    }
+
     // Do recursion in extended precision
     // NOTE: for checking actual precision of recursion, can reorder
     // eigenvalues, or add random 1e-15 values, and see how both of these affect
@@ -68,17 +75,17 @@ int main(int argc, char* argv[]) {
     std::cout << "# Det M: " << det << std::endl;
     std::cout << "# phase(Det M): " << atan2(det_im, det) << std::endl;
 
-    // Output c_Q/det(M), phase(c_Q) for each Q
+    // Output ZC(Q) = c_Q/det(M) for each Q
     // Q = k - k_max/2
-    std::cout << "# Coeffs (Q, re, im, ln|magnitude|, phase): " << std::endl;
+    std::cout << "# Coeffs (Q, ZC_re, ZC_im): " << std::endl;
     for (int k = 0; k <= k_max; ++k) {
       int Q = k - k_max / 2;
       mpfr::mpreal magnitude =
           sqrt(c_new_re[k] * c_new_re[k] + c_new_im[k] * c_new_im[k]);
       mpfr::mpreal phase = atan2(c_new_im[k], c_new_re[k]);
       std::cout << i_config << "\t" << Q << "\t" << c_new_re[k] / det << "\t"
-                << c_new_im[k] / det << "\t" << magnitude / det << "\t" << phase
-                << std::endl;
+                << c_new_im[k] / det << "\t" << P_evals(k).real() << "\t"
+                << phase << std::endl;
     }
   }
   return 0;
