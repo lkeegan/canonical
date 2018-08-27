@@ -75,7 +75,9 @@ endif(MPFR_INCLUDES)
 
 # want to also look in LD_LIBRARY_PATH
 # need to convert this colon-separated list to semi-colon-separated list for CMake
+if($ENV{LD_LIBRARY_PATH} MATCHES ":")
 string(REPLACE ":" ";" LIBRARY_DIRS $ENV{LD_LIBRARY_PATH})
+endif($ENV{LD_LIBRARY_PATH} MATCHES ":")
 
 find_library(MPFR_LIBRARIES mpfr PATHS $ENV{GMPDIR} ${LIB_INSTALL_DIR} ${LIBRARY_DIRS})
 
