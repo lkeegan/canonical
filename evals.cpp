@@ -39,8 +39,8 @@ int main(int argc, char* argv[]) {
     // Output eigenvalues
     std::cout << "# Eigenvalues (lambda_re, lambda_im): " << std::endl;
     for (int k = 0; k < P_evals.rows(); ++k) {
-      std::cout << "#EV " << P_evals(k).real() << "\t" << P_evals(k).imag()
-                << std::endl;
+      std::cout << "#EV " << i_config << "\t" << P_evals(k).real() << "\t"
+                << P_evals(k).imag() << std::endl;
     }
 
     // Do recursion in extended precision
