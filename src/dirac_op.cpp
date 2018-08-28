@@ -196,11 +196,14 @@ Eigen::MatrixXcd dirac_op::B_dense_matrix(field<gauge>& U, int it) {
   return B_matrix;
 }
 
-Eigen::MatrixXcd dirac_op::P_eigenvalues(field<gauge>& U) {
+Eigen::MatrixXcd dirac_op::P_eigenvalues(field<gauge>& U, double theta) {
   Eigen::MatrixXcd P_matrix =
       Eigen::MatrixXcd::Zero(2 * N_gauge * U.VOL3, 2 * N_gauge * U.VOL3);
   // gauge fix U to axial gauge
   gauge_fix_axial(U);
+  // multiply single gauge link at (T-1,ix3=0) by e^{i 2pi theta}
+  int ix4 = U.it_ix(U.L0 - 1, 0);
+  U[ix4][0] = U[ix4][0] * std::polar<double>(1.0, 6.28318530718 * theta);
   // construct
   // ((U, 0), (0, U))
   // where U is the set of L^3 timelike links on timeslice T-1

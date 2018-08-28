@@ -64,7 +64,8 @@ class dirac_op {
   // explicitly construct dense (2x3xVOL3)x(2x3xVOL3) matrix P
   // diagonalise and return all eigenvalues
   // NOTE: also gauge fixes U to axial gauge
-  Eigen::MatrixXcd P_eigenvalues(field<gauge>& U);
+  // NOTE2: also multiplies single gauge link U[T-1,ix3=0] by exp(i theta)
+  Eigen::MatrixXcd P_eigenvalues(field<gauge>& U, double theta = 0.0);
 
   // explicitly construct dense (2x3xVOL3)x(2x3xVOL3) matrix
   // B at timeslice it, using normalisation D = 2m + U..
