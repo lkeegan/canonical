@@ -1,5 +1,5 @@
-#ifndef LKEEGAN_MURHMC_DIRAC_OP_H
-#define LKEEGAN_MURHMC_DIRAC_OP_H
+#ifndef LKEEGAN_CANONICAL_DIRAC_OP_H
+#define LKEEGAN_CANONICAL_DIRAC_OP_H
 #include <random>
 #include "4d.hpp"
 #include "Eigen3/Eigen/Eigenvalues"
@@ -72,4 +72,4 @@ class dirac_op {
   Eigen::MatrixXcd B_dense_matrix(field<gauge>& U, int it);
 };
 
-#endif  // LKEEGAN_MURHMC_DIRAC_OP_H
+#endif  // LKEEGAN_CANONICAL_DIRAC_OP_H

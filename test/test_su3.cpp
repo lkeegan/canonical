@@ -1,8 +1,8 @@
-#include "su3.hpp"
 #include <iostream>
 #include <limits>
 #include "Eigen3/unsupported/Eigen/MatrixFunctions"  //for matrix exponential
 #include "catch.hpp"
+#include "su3.hpp"
 
 constexpr double EPS = 5.e-14;
 

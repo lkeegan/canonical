@@ -1,5 +1,5 @@
-#ifndef LKEEGAN_MURHMC_SU3_H
-#define LKEEGAN_MURHMC_SU3_H
+#ifndef LKEEGAN_CANONICAL_SU3_H
+#define LKEEGAN_CANONICAL_SU3_H
 #include <complex>
 #ifdef EIGEN_USE_MKL_ALL
 // ugly hack to get mkl to work with c++ std::complex type
@@ -133,4 +133,4 @@ class gauge {
   }
 };
 
-#endif  // LKEEGAN_MURHMC_SU3_H
+#endif  // LKEEGAN_CANONICAL_SU3_H

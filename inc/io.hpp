@@ -1,5 +1,5 @@
-#ifndef LKEEGAN_MURHMC_IO_H
-#define LKEEGAN_MURHMC_IO_H
+#ifndef LKEEGAN_CANONICAL_IO_H
+#define LKEEGAN_CANONICAL_IO_H
 #include <mpreal.h>
 #include <complex>
 #include <fstream>
@@ -33,4 +33,4 @@ void write_gauge_field(field<gauge>& U, const std::string& base_name,
 // calculate average plaqutte for use as checksum
 double checksum_plaquette(const field<gauge>& U);
 
-#endif  // LKEEGAN_MURHMC_IO_H
+#endif  // LKEEGAN_CANONICAL_IO_H

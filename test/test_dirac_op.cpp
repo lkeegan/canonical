@@ -1,6 +1,6 @@
-#include "dirac_op.hpp"
 #include <iostream>
 #include "catch.hpp"
+#include "dirac_op.hpp"
 #include "io.hpp"
 
 constexpr double EPS = 1.e-13;
